@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coffre de l'Expédition Rondon</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Special+Elite&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1a110a;
+    font-family: 'Playfair Display', Georgia, serif;
+    color: #f5ecd5;
+    padding: 1rem;
+  }
+
+  /* Texture de fond */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      45deg,
+      rgba(0,0,0,0.03) 0px,
+      rgba(0,0,0,0.03) 1px,
+      transparent 1px,
+      transparent 8px
+    );
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+
+  /* ── ÉCRAN CADENAS ── */
+  #screen-lock { display: flex; flex-direction: column; align-items: center; gap: 1.5rem; }
+  #screen-open { display: none; flex-direction: column; align-items: center; gap: 1.5rem; }
+
+  .chest-icon {
+    font-size: 72px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 12px rgba(196,153,26,0.4));
+    transition: transform 0.4s ease;
+  }
+
+  .title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #f0c430;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: #a08060;
+    font-family: 'Special Elite', serif;
+    letter-spacing: 1px;
+  }
+
+  /* ── CARTE CADENAS ── */
+  .lock-card {
+    background: #2c1a00;
+    border: 1.5px solid #c4991a;
+    border-radius: 12px;
+    padding: 1.75rem 1.5rem;
+    width: 100%;
+  }
+
+  .lock-card p {
+    font-family: 'Special Elite', serif;
+    font-size: 13px;
+    color: #a08060;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+  }
+
+  /* ── DIGITS ── */
+  .digits {
+    display: flex;
+    gap: 14px;
+    justify-content: center;
+    margin-bottom: 1.25rem;
+  }
+
+  .digit-input {
+    width: 68px;
+    height: 80px;
+    font-size: 36px;
+    font-weight: 700;
+    text-align: center;
+    background: #1a110a;
+    border: 1.5px solid #5a3a10;
+    border-radius: 8px;
+    color: #f0c430;
+    font-family: 'Playfair Display', serif;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+  }
+  .digit-input::-webkit-inner-spin-button,
+  .digit-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+
+  .digit-input:focus {
+    border-color: #c4991a;
+    box-shadow: 0 0 0 3px rgba(196,153,26,0.2);
+  }
+
+  .digit-input.error { border-color: #7b1a1a; }
+  .digit-input.success { border-color: #1b5e2f; }
+
+  /* ── MESSAGE D'ERREUR ── */
+  .msg {
+    min-height: 20px;
+    font-family: 'Special Elite', serif;
+    font-size: 13px;
+    color: #c04040;
+    margin-bottom: 1rem;
+    transition: opacity 0.3s;
+  }
+
+  /* ── BOUTON ── */
+  .btn {
+    width: 100%;
+    padding: 0.85rem;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+    letter-spacing: 1px;
+    border-radius: 8px;
+    border: 1.5px solid #c4991a;
+    background: #3d2200;
+    color: #f0c430;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .btn:hover { background: #522e00; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-secondary {
+    background: transparent;
+    border-color: #5a3a10;
+    color: #a08060;
+    font-size: 13px;
+    padding: 0.6rem 1.5rem;
+    width: auto;
+    margin-top: 0.5rem;
+  }
+
+  /* ── SÉPARATEUR ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    color: #5a3a10;
+    font-size: 16px;
+    letter-spacing: 6px;
+  }
+  .divider::before, .divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: #5a3a10;
+  }
+
+  /* ── ÉCRAN SUCCÈS ── */
+  .success-card {
+    background: #0d1f0d;
+    border: 1.5px solid #1b5e2f;
+    border-radius: 12px;
+    padding: 1.5rem;
+    width: 100%;
+  }
+
+  .success-card blockquote {
+    font-style: italic;
+    font-size: 15px;
+    color: #a8c8a0;
+    line-height: 1.8;
+    margin-bottom: 12px;
+  }
+
+  .success-card cite {
+    font-size: 12px;
+    color: #5a8a5a;
+    font-style: normal;
+    font-family: 'Special Elite', serif;
+    letter-spacing: 1px;
+  }
+
+  /* ── ÉTAPES ── */
+  .route {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .etape {
+    background: #1b3a1b;
+    border: 1px solid #2e7d42;
+    color: #a8c8a0;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-family: 'Special Elite', serif;
+    letter-spacing: 0.5px;
+  }
+
+  .arrow { color: #5a8a5a; font-size: 14px; }
+
+  /* ── CONFETTIS (simple) ── */
+  @keyframes fall {
+    from { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    to   { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .confetti {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── ANIMATION D'ENTRÉE ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up { animation: fadeUp 0.5s ease forwards; }
+
+  /* ── PIED DE PAGE ── */
+  .footer-text {
+    font-family: 'Special Elite', serif;
+    font-size: 11px;
+    color: #5a3a10;
+    letter-spacing: 2px;
+    margin-top: 1rem;
+  }
+
+  /* ── SHAKE ANIMATION ── */
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── ÉCRAN CADENAS ── -->
+  <div id="screen-lock">
+
+    <div class="chest-icon">🔒</div>
+
+    <div>
+      <div class="title">Coffre de l'Expédition</div>
+      <div class="subtitle">Cândido Rondon · Costa Verde · 1907</div>
+    </div>
+
+    <div class="divider">✦ ✦ ✦</div>
+
+    <div class="lock-card">
+      <p>Ce coffre contient les cartes et carnets secrets de l'explorateur Rondon. Entrez le code à 3 chiffres pour l'ouvrir.</p>
+
+      <div class="digits">
+        <input class="digit-input" id="d1" type="number" min="0" max="9"
+          aria-label="Premier chiffre"
+          oninput="move(this,'d2')" onkeydown="back(event,this,null)" autofocus>
+        <input class="digit-input" id="d2" type="number" min="0" max="9"
+          aria-label="Deuxième chiffre"
+          oninput="move(this,'d3')" onkeydown="back(event,this,'d1')">
+        <input class="digit-input" id="d3" type="number" min="0" max="9"
+          aria-label="Troisième chiffre"
+          oninput="move(this,null)" onkeydown="back(event,this,'d2')">
+      </div>
+
+      <div class="msg" id="msg" aria-live="polite"></div>
+
+      <button class="btn" onclick="check()" aria-label="Ouvrir le coffre">
+        Ouvrir le coffre
+      </button>
+    </div>
+
+    <p class="footer-text">✦ OPÉRATION AMAZONIE ✦</p>
+  </div>
+
+  <!-- ── ÉCRAN SUCCÈS ── -->
+  <div id="screen-open">
+
+    <div class="chest-icon" id="chest-anim">🔓</div>
+
+    <div class="fade-up">
+      <div class="title" style="color:#a8c8a0">Le coffre est ouvert !</div>
+      <div class="subtitle" style="color:#5a8a5a">Mission accomplie, camarades.</div>
+    </div>
+
+    <div class="divider" style="color:#2e7d42">✦ ✦ ✦</div>
+
+    <div class="success-card fade-up">
+      <blockquote>
+        « Vous avez retrouvé mon itinéraire. Rio, Ilha Grande, Paraty, Ponta Negra — voilà votre voyage. Prenez soin du Brésil. Il vous appartient aussi. »
+      </blockquote>
+      <cite>— Cândido Rondon, 1907</cite>
+    </div>
+
+    <div class="route fade-up">
+      <span class="etape">Rio de Janeiro</span>
+      <span class="arrow">→</span>
+      <span class="etape">Ilha Grande</span>
+      <span class="arrow">→</span>
+      <span class="etape">Paraty</span>
+      <span class="arrow">→</span>
+      <span class="etape">Ponta Negra</span>
+      <span class="arrow">→</span>
+      <span class="etape">Rio de Janeiro</span>
+    </div>
+
+    <button class="btn btn-secondary" onclick="reset()">Recommencer</button>
+
+    <p class="footer-text" style="color:#2e7d42">✦ OPÉRATION AMAZONIE ✦</p>
+  </div>
+
+</div>
+
+<script>
+  function move(el, nextId) {
+    const v = el.value.replace(/[^0-9]/g, '');
+    el.value = v.slice(-1);
+    if (el.value && nextId) document.getElementById(nextId).focus();
+  }
+
+  function back(e, el, prevId) {
+    if (e.key === 'Backspace' && el.value === '' && prevId)
+      document.getElementById(prevId).focus();
+    if (e.key === 'Enter') check();
+  }
+
+  function check() {
+    const d1 = document.getElementById('d1').value;
+    const d2 = document.getElementById('d2').value;
+    const d3 = document.getElementById('d3').value;
+    const msg = document.getElementById('msg');
+    const inputs = ['d1','d2','d3'].map(id => document.getElementById(id));
+
+    if (!d1 || !d2 || !d3) {
+      msg.textContent = 'Entrez les 3 chiffres.';
+      return;
+    }
+
+    if (d1 === '3' && d2 === '7' && d3 === '2') {
+      inputs.forEach(i => i.classList.add('success'));
+      setTimeout(() => {
+        document.getElementById('screen-lock').style.display = 'none';
+        const s = document.getElementById('screen-open');
+        s.style.display = 'flex';
+        launchConfetti();
+      }, 300);
+    } else {
+      inputs.forEach(i => i.classList.add('error'));
+      const lockCard = document.querySelector('.lock-card');
+      lockCard.classList.add('shake');
+      msg.textContent = 'Code incorrect. Réessayez.';
+      setTimeout(() => {
+        inputs.forEach(i => i.classList.remove('error'));
+        lockCard.classList.remove('shake');
+      }, 600);
+    }
+  }
+
+  function reset() {
+    ['d1','d2','d3'].forEach(id => {
+      const el = document.getElementById(id);
+      el.value = '';
+      el.classList.remove('success','error');
+    });
+    document.getElementById('msg').textContent = '';
+    document.getElementById('screen-open').style.display = 'none';
+    document.getElementById('screen-lock').style.display = 'flex';
+    document.getElementById('d1').focus();
+  }
+
+  function launchConfetti() {
+    const colors = ['#f0c430','#1b5e2f','#7b1a1a','#c4991a','#a8c8a0'];
+    for (let i = 0; i < 40; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.top = '-10px';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.animation = `fall ${1.5 + Math.random() * 2}s ease ${Math.random() * 0.8}s forwards`;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4000);
+    }
+  }
+</script>
+
+</body>
+</html>
